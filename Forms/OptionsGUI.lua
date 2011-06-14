@@ -10,6 +10,8 @@ local OptionsGUI = Foresight_OptionsGUI
 OptionsGUI:SetTitle('Foresight - Options')
 OptionsGUI.content.padding = 15
 
+OptionsGUI._Show = OptionsGUI.Show
+
 local form = Libra.UI.FrameManager:Create('Frame', OptionsGUI.content)
 
 form.row1 = Libra.UI.FrameManager:Create('Frame', form)
@@ -46,10 +48,10 @@ form.window_y = Libra.UI.NumberBox:Create(form.row3)
 form.window_y:SetPoint('TOPRIGHT', form.row3, 'TOPRIGHT')
 
 form.row4.label = Libra.UI.FrameManager:Create('Text', form.row4)
-form.row4.label:SetText('Hide timers when finished?')
+form.row4.label:SetText('Track on on timelines?')
 form.row4.label:SetFontSize(18)
 form.row4.label:ResizeToText()
-form.hide_when_done = Libra.UI.Toggle:Create(form.row4)
+form.own_timelines = Libra.UI.Toggle:Create(form.row4)
 
 form.bt_Save = Libra.UI.Button:Create(form.row5)
 form.bt_Save:SetPoint('CENTER', form.row5, 'CENTER', 0, 6)
@@ -73,22 +75,11 @@ form.row4.label:SetPoint('TOPLEFT', form.row4, 'TOPLEFT', 0, (form.row4:GetHeigh
 form.row5:SetPoint('TOPLEFT', form.row4, 'BOTTOMLEFT')
 form.row5:SetPoint('TOPRIGHT', form.row4, 'BOTTOMRIGHT')
 
-form.hide_when_done:SetPoint('TOPRIGHT', form.row4, 'TOPRIGHT', 0, (form.row4:GetHeight() - form.hide_when_done:GetHeight()) / 2)
+form.own_timelines:SetPoint('TOPRIGHT', form.row4, 'TOPRIGHT', 0, (form.row4:GetHeight() - form.own_timelines:GetHeight()) / 2)
 
 OptionsGUI:SetContent(form)
 OptionsGUI.form = form
 OptionsGUI:Resize( form.row1:GetHeight() + form.row2:GetHeight() + form.row3:GetHeight() + form.row4:GetHeight() + form.row5:GetHeight() +(OptionsGUI.content.padding * 2), 400)
 OptionsGUI:SetPoint('TOPLEFT', UIParent, 'TOPLEFT', (UIParent:GetWidth() / 2) - (OptionsGUI:GetWidth() / 2), (UIParent:GetHeight() / 2) - (OptionsGUI:GetHeight() / 2))
+OptionsGUI:SetLayer(100)
 
-
-
----------------------------------
--- OptionsGUI Functions
----------------------------------
-function OptionsGUI.form.bt_Save.Event:LeftDown()
-	Foresight_Config.width = OptionsGUI.form.barwidth:GetValue()
-	Foresight_Config.x = OptionsGUI.form.window_x:GetValue()
-	Foresight_Config.y = OptionsGUI.form.window_y:GetValue()
-	Foresight_Config.hide_when_done = OptionsGUI.form.hide_when_done:GetValue()
-	Refresh()
-end

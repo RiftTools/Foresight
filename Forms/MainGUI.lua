@@ -6,9 +6,8 @@ local context = UI.CreateContext("Context")
 Foresight_MainGUI = Libra.UI.Timeline:Create(context)
 local MainGUI = Foresight_MainGUI 
 
-MainGUI:SetPoint('CENTER',UIParent,'CENTER')
-
 MainGUI.border.size = 2
+MainGUI.multi_timeline = true
 
 MainGUI:SetMax(20)
 
@@ -44,9 +43,9 @@ function MainGUI:Hide()
 	self:SetVisible(false)
 end
 
-function MainGUI:Refresh()
-	--Foresight_Config.x = x
-	--Foresight_Config.y = y
+function MainGUI:Refresh()	
+	MainGUI:SetPoint('TOPLEFT', UIParent, 'TOPLEFT', Foresight_Config.x, Foresight_Config.y)
+	MainGUI:SetWidth(Foresight_Config.width)
 	self:_Refresh()
 end
 
@@ -124,8 +123,6 @@ function MainGUI.WaitingBox:Refresh()
 			entry.payload:SetPoint('TOPCENTER', MainGUI.ActiveBox.background, 'TOPCENTER')
 			entry.payload:SetPoint('BOTTOMCENTER', MainGUI.ActiveBox.background, 'BOTTOMCENTER')
 			entry.payload:SetPoint('CENTER', MainGUI.ActiveBox.background, 'CENTER')
-			
-			print(tostring(entry.payload:GetTexture()))
 		else
 			entry.payload:SetWidth(24)
 			entry.payload:SetHeight(24)
@@ -136,17 +133,6 @@ function MainGUI.WaitingBox:Refresh()
 	end
 	
 	self:_Refresh()
-end
-
---
--- Updates then displays the OptionsGUI
---
-function MainGUI:ShowSettings()	
-	OptionsGUI.form.barwidth:SetValue(Foresight_Config.width)
-	OptionsGUI.form.window_x:SetValue(Foresight_Config.x)
-	OptionsGUI.form.window_y:SetValue(Foresight_Config.y)
-	OptionsGUI.form.hide_when_done:Toggle(Foresight_Config.hide_when_done)
-	OptionsGUI:Show()
 end
 
 --
@@ -193,7 +179,7 @@ function MainGUI:AddCooldown(id)
 		text:SetParent(icon)
 		text:SetFontSize(12)
 		text:ResizeToText()
-		MainGUI:AddEntry(id, icon, ability.currentCooldownRemaining)
+		MainGUI:AddEntry(id, icon, ability.currentCooldownRemaining, 0, ability.cooldown)
 
 	elseif not self.Entries[id] and self.ReadyAbilities[id] then
 		-- Move from waiting to on cooldown
@@ -210,7 +196,7 @@ function MainGUI:AddCooldown(id)
 		text:SetParent(icon)
 		text:SetFontSize(12)
 		text:ResizeToText()
-		MainGUI:AddEntry(id, icon, ability.currentCooldownRemaining)
+		MainGUI:AddEntry(id, icon, ability.currentCooldownRemaining, 0, ability.cooldown)
 	elseif self.Entries[id] and not self.ReadyAbilities[id] then
 		self.Entries[id].value = ability.currentCooldownRemaining
 		self.Entries[id].payload.text = ability.currentCooldownRemaining

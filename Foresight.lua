@@ -14,11 +14,35 @@ Foresight_Config = {
 	x = 500,
 	y = 500,
 	width = 220,
-	hide_when_done = true
+	own_timelines = true,
+	ignore_list = { a = true, b = false}
 }
 
+OptionsGUI.form.barwidth:SetValue(Foresight_Config.width)
+OptionsGUI.form.window_x:SetValue(Foresight_Config.x)
+OptionsGUI.form.window_y:SetValue(Foresight_Config.y)
+OptionsGUI.form.own_timelines:Toggle(Foresight_Config.own_timelines)
 
-TEMPCOUNTER = 0
+---------------------------------
+-- OptionsGUI Functions
+---------------------------------
+function OptionsGUI.form.bt_Save.Event:LeftDown()
+	print('Applied settings')
+	Foresight_Config.width = OptionsGUI.form.barwidth:GetValue()
+	Foresight_Config.x = OptionsGUI.form.window_x:GetValue()
+	Foresight_Config.y = OptionsGUI.form.window_y:GetValue()
+	Foresight_Config.own_timelines = OptionsGUI.form.own_timelines:GetValue()
+	MainGUI.multi_timeline = OptionsGUI.form.own_timelines:GetValue()
+	MainGUI:Refresh()
+end
+
+function OptionsGUI:Show()
+	OptionsGUI.form.barwidth:SetValue(Foresight_Config.width or 0)
+	OptionsGUI.form.window_x:SetValue(Foresight_Config.x or 0)
+	OptionsGUI.form.window_y:SetValue(Foresight_Config.y or 0)
+	OptionsGUI.form.own_timelines:Toggle(Foresight_Config.own_timelines or true)
+	OptionsGUI:_Show()
+end
 
 -- 
 -- 
@@ -35,20 +59,27 @@ end
 --
 -- This handles checking our trackers
 --
+local _refresh_counter = 0
+local _debug_counter = 0
 local function _RefreshService()
-	if Libra.Utils.Registry.Entries['CACHE_ABILITIES'] then
-		for id, ability in pairs(Libra.Utils.Registry.Entries['CACHE_ABILITIES']) do
-			if MainGUI.Entries[id] then
-				MainGUI:UpdateCooldown(id)
+	local now = Inspect.System.Time()
+	
+	if now >= _refresh_counter then
+		if Libra.Utils.Registry.Entries['CACHE_ABILITIES'] then
+			for id, ability in pairs(Libra.Utils.Registry.Entries['CACHE_ABILITIES']) do
+				if MainGUI.Entries[id] then
+					MainGUI:UpdateCooldown(id)
+				end
 			end
 		end
+		_refresh_counter = now + 0.1--0.1
 	end
 	
-	if Inspect.System.Time() > TEMPCOUNTER + 30 then
+	if Inspect.System.Time() > _debug_counter then
 		for name, value in pairs(Libra.Utils.Registry.Entries['STAT_FRAME_MANAGER']) do
-			print('FM: [' .. name .. '] [' .. value .. ']')
+			--print('FM: [' .. name .. '] [' .. value .. ']')
 		end
-		TEMPCOUNTER = Inspect.System.Time()
+		_debug_counter = now + 30
 	end
 	
 	MainGUI:Refresh()
@@ -98,24 +129,6 @@ table.insert(Event.Ability.Cooldown.End, { _ShowReadyCooldowns, "Foresight", 'Co
 
 -- Register our slash command
 local function _SlashCommand(args)
-	local cmd = args:match("(%a+)")
-	cmd = tostring(cmd)
-	
-	if cmd == 'width' then
-		if not x then
-			print("Example: /foresight width 220")
-		end
-		Foresight_Config.width = x
-		
-	elseif cmd == 'pos' then
-		if x and y then
-			Foresight_Config.x = x
-			Foresight_Config.y = y
-		else
-			print("Example: /foresight pos 200 100")	
-		end
-	elseif cmd == 'add' then
-			
-	end
+	OptionsGUI:Show()
 end
 table.insert(Command.Slash.Register("Foresight"), { _SlashCommand, "Foresight", 'config' })
