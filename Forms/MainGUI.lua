@@ -11,6 +11,8 @@ MainGUI.multi_timeline = true
 
 MainGUI:SetMax(20)
 
+MainGUI.background:SetBackgroundColor(0,0,0,0.15)
+
 MainGUI.WaitingBox = Libra.UI.SmartGrid:Create(MainGUI)
 MainGUI.WaitingBox:SetPoint('BOTTOMLEFT', MainGUI, 'TOPLEFT')
 MainGUI.WaitingBox.border.size = 2
@@ -26,6 +28,8 @@ MainGUI.ActiveBox.background:SetPoint('TOPLEFT', MainGUI.ActiveBox, 'TOPLEFT', M
 MainGUI.ActiveBox.background:SetPoint('BOTTOMLEFT', MainGUI.ActiveBox, 'BOTTOMLEFT', MainGUI.border.size, MainGUI.border.size)
 MainGUI.ActiveBox.background:SetPoint('BOTTOMRIGHT', MainGUI.ActiveBox, 'BOTTOMRIGHT', -MainGUI.border.size, -MainGUI.border.size)
 MainGUI.ActiveBox:SetLayer(10)
+
+MainGUI.ActiveBox.background:SetBackgroundColor(0,0,0,0.15)
 
 -- Cache the Refresh methods we plan to override
 MainGUI._Refresh = MainGUI.Refresh
@@ -104,6 +108,7 @@ function MainGUI.WaitingBox:Refresh()
 		
 		if entry.payload.text then
 			Libra.UI.FrameManager:Recycle(entry.payload.text)
+			Libra.UI.FrameManager:Recycle(entry.payload.text.shadow)
 			entry.payload.text = nil
 		end
 		
@@ -169,16 +174,24 @@ function MainGUI:AddCooldown(id)
 		-- Adding
 		local icon = Libra.UI.FrameManager:Create('Texture', MainGUI.background)
 		local text = Libra.UI.FrameManager:Create('Text', MainGUI.background)
+		text.shadow = Libra.UI.FrameManager:Create('Text', MainGUI.background)
+		
 		icon:SetTexture('Rift', ability.icon)
 		icon:SetHeight(34)
 		icon:SetWidth(34)
 		icon:SetLayer(4)
 		icon.text = text
-		text:SetPoint('BOTTOMRIGHT', icon, 'BOTTOMRIGHT', 0, 2)
+		text.shadow:SetPoint('BOTTOMRIGHT', icon, 'BOTTOMRIGHT', 0, 2)
+		text:SetPoint('BOTTOMRIGHT', text.shadow, 'BOTTOMRIGHT', -1, -1)
 		text:SetText( self:FormatTime(ability.currentCooldownRemaining) )
-		text:SetParent(icon)
+		text.shadow:SetText( self:FormatTime(ability.currentCooldownRemaining) )
+		text.shadow:SetParent(icon)
+		text:SetParent(text.shadow)
 		text:SetFontSize(12)
+		text.shadow:SetFontSize(12)
 		text:ResizeToText()
+		text.shadow:ResizeToText()
+		text.shadow:SetFontColor(0,0,0,1)
 		MainGUI:AddEntry(id, icon, ability.currentCooldownRemaining, 0, ability.cooldown)
 
 	elseif not self.Entries[id] and self.ReadyAbilities[id] then
@@ -186,21 +199,31 @@ function MainGUI:AddCooldown(id)
 		self.WaitingBox:Remove(id)
 		local icon = Libra.UI.FrameManager:Create('Texture', MainGUI.background)
 		local text = Libra.UI.FrameManager:Create('Text', MainGUI.background)
+		text.shadow = Libra.UI.FrameManager:Create('Text', MainGUI.background)
 		icon:SetTexture('Rift', ability.icon)
 		icon:SetHeight(34)
 		icon:SetWidth(34)
 		icon:SetLayer(4)
 		icon.text = text
-		text:SetPoint('BOTTOMRIGHT', icon, 'BOTTOMRIGHT', 0, 2)
+		text.shadow:SetPoint('BOTTOMRIGHT', icon, 'BOTTOMRIGHT', 0, 2)
+		text:SetPoint('BOTTOMRIGHT', text.shadow, 'BOTTOMRIGHT', -1, -1)
 		text:SetText( self:FormatTime(ability.currentCooldownRemaining) )
-		text:SetParent(icon)
+		text.shadow:SetText( self:FormatTime(ability.currentCooldownRemaining) )
+		text.shadow:SetParent(icon)
+		text:SetParent(text.shadow)
 		text:SetFontSize(12)
+		text.shadow:SetFontSize(12)
 		text:ResizeToText()
+		text.shadow:ResizeToText()
+		text.shadow:SetFontColor(0,0,0,1)
 		MainGUI:AddEntry(id, icon, ability.currentCooldownRemaining, 0, ability.cooldown)
+		
 	elseif self.Entries[id] and not self.ReadyAbilities[id] then
 		self.Entries[id].value = ability.currentCooldownRemaining
-		self.Entries[id].payload.text = ability.currentCooldownRemaining
+		self.Entries[id].payload.text:SetText(ability.currentCooldownRemaining)
+		self.Entries[id].payload.text.shadow:SetText(ability.currentCooldownRemaining)
 		self.Entries[id].payload.text:ResizeToText()
+		self.Entries[id].payload.text.shadow:ResizeToText()
 	end
 end
 
@@ -213,6 +236,8 @@ function MainGUI:UpdateCooldown(id)
 		local ability = Inspect.Ability.Detail(id)
 		self.Entries[id].value = ability.currentCooldownRemaining
 		self.Entries[id].payload.text:SetText( self:FormatTime(ability.currentCooldownRemaining) )
+		self.Entries[id].payload.text.shadow:SetText( self:FormatTime(ability.currentCooldownRemaining) )
 		self.Entries[id].payload.text:ResizeToText()
+		self.Entries[id].payload.text.shadow:ResizeToText()
 	end
 end

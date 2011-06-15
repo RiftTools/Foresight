@@ -15,7 +15,8 @@ Foresight_Config = {
 	y = 500,
 	width = 220,
 	own_timelines = true,
-	ignore_list = { a = true, b = false}
+	ignore_list = { a = true, b = false},
+	hold_time = 15
 }
 
 OptionsGUI.form.barwidth:SetValue(Foresight_Config.width)
@@ -32,6 +33,7 @@ function OptionsGUI.form.bt_Save.Event:LeftDown()
 	Foresight_Config.x = OptionsGUI.form.window_x:GetValue()
 	Foresight_Config.y = OptionsGUI.form.window_y:GetValue()
 	Foresight_Config.own_timelines = OptionsGUI.form.own_timelines:GetValue()
+	Foresight_Config.hold_time = OptionsGUI.form.hold_time:GetValue()
 	MainGUI.multi_timeline = OptionsGUI.form.own_timelines:GetValue()
 	MainGUI:Refresh()
 end
@@ -41,6 +43,7 @@ function OptionsGUI:Show()
 	OptionsGUI.form.window_x:SetValue(Foresight_Config.x or 0)
 	OptionsGUI.form.window_y:SetValue(Foresight_Config.y or 0)
 	OptionsGUI.form.own_timelines:Toggle(Foresight_Config.own_timelines or true)
+	OptionsGUI.form.hold_time:SetValue(Foresight_Config.hold_time or 0)
 	OptionsGUI:_Show()
 end
 
@@ -118,7 +121,7 @@ function _ShowReadyCooldowns(cooldowns)
 			local tmp = MainGUI.Entries[id]
 			MainGUI:RemoveEntry(id)
 			-- Add a timer to it so we know when to get rid of it
-			tmp.timer = Libra.Utils.Timer:Create(id, 15, _DestroyWaiting, id)
+			tmp.timer = Libra.Utils.Timer:Create(id, Foresight_Config.hold_time or 15, _DestroyWaiting, id)
 			MainGUI.WaitingBox:Add(id, tmp)
 		end		
 	end
